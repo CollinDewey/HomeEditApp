@@ -32,8 +32,8 @@ include $(DEVKITARM)/3ds_rules
 #     - <libctru folder>/default_icon.png
 #---------------------------------------------------------------------------------
 
-APP_TITLE := Dear ImGui
-TARGET    := 3ds/imgui
+APP_TITLE := Home Editor WIP
+TARGET    := 3ds/hedit
 BUILD     := 3ds/build
 SOURCES   += source/imgui
 SOURCES  := source source/3ds source/imgui
@@ -50,7 +50,7 @@ VERSION_MICRO := 0
 VERSION := $(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_MICRO)
 
 APP_DESCRIPTION := v$(VERSION)
-APP_AUTHOR      := Sample Author
+APP_AUTHOR      := Legit_Magic
 
 ICON      := meta/icon.png
 BNR_IMAGE := meta/banner.png
