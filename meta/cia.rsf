@@ -1,6 +1,6 @@
 BasicInfo:
-  Title                   : "Dear ImGui"
-  ProductCode             : "Dear ImGui"
+  Title                   : "Home Editor WIP"
+  ProductCode             : "HEWIP"
   Logo                    : Homebrew # Nintendo / Licensed / Distributed / iQue / iQueForSystem
 
 RomFs:
