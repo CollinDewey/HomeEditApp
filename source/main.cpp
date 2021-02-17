@@ -1,4 +1,5 @@
 // Copyright (C) 2020 Michael Theall
+// Copyright (C) 2021 Legit_Magic
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -61,7 +62,7 @@ C3D_Tex s_gfxTexture;
 Tex3DS_Texture s_gfxT3x;
 
 /// \brief Clear color
-constexpr auto CLEAR_COLOR = 0x808080FF;
+constexpr auto CLEAR_COLOR = 0x0080FFFF;
 
 int main (int argc_, char *argv_[]) {
 
@@ -93,15 +94,15 @@ int main (int argc_, char *argv_[]) {
 	imgui::citro3d::init();
 
 	// load texture atlas
-	FILE *file = fopen("test.bin","rb");
-	if (!fopen("romfs:/gfx.t3x", "r"))
-		svcBreak(USERBREAK_PANIC);
-
-	s_gfxT3x = Tex3DS_TextureImportStdio (file, &s_gfxTexture, nullptr, true);
-	if (!s_gfxT3x)
-		svcBreak(USERBREAK_PANIC);
-
-	C3D_TexSetFilter (&s_gfxTexture, GPU_LINEAR, GPU_LINEAR);
+	//FILE *file = fopen("test.bin","rb");
+	//if (!fopen("romfs:/gfx.t3x", "r"))
+	//	svcBreak(USERBREAK_PANIC);
+	//
+	//s_gfxT3x = Tex3DS_TextureImportStdio (file, &s_gfxTexture, nullptr, true);
+	//if (!s_gfxT3x)
+	//	svcBreak(USERBREAK_PANIC);
+	//
+	//C3D_TexSetFilter (&s_gfxTexture, GPU_LINEAR, GPU_LINEAR);
 
 	auto &io    = ImGui::GetIO();
 	auto &style = ImGui::GetStyle();
@@ -109,9 +110,12 @@ int main (int argc_, char *argv_[]) {
 	// disable imgui.ini file
 	io.IniFilename = nullptr;
 
-	// citro3d logo doesn't quite show with the default transparency
-	style.Colors[ImGuiCol_WindowBg].w = 0.8f;
+	style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 	style.ScaleAllSizes(0.5f);
+	
+	// bottom screen safe area. number from trial/error
+	//style.DisplaySafeAreaPadding = ImVec2(146.8f, 0.0f);
+	//style.DisplaySafeAreaPadding = ImVec2(55.0f, 0.0f);
 
 	// turn off window rounding
 	style.WindowRounding = 0.0f;
@@ -119,6 +123,11 @@ int main (int argc_, char *argv_[]) {
 	// setup display metrics
 	io.DisplaySize = ImVec2(SCREEN_WIDTH, SCREEN_HEIGHT);
 	io.DisplayFramebufferScale = ImVec2(FB_SCALE, FB_SCALE);
+	auto const width = io.DisplaySize.x;
+	auto const height = io.DisplaySize.y;
+
+	//ImGui::SetColorEditOptions(ImGuiColorEditFlags_Uint8 | ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_InputRGB | ImGuiColorEditFlags_PickerHueBar);
+	ImGuiColorEditFlags color_flags = ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_DisplayHex | ImGuiColorEditFlags_PickerHueWheel; //| ImGuiColorEditFlags_NoPicker;
 
 	while (aptMainLoop()) {
 
@@ -131,23 +140,69 @@ int main (int argc_, char *argv_[]) {
 		imgui::ctru::newFrame();
 		ImGui::NewFrame();
 
-		auto const width = io.DisplaySize.x;
-		auto const height = io.DisplaySize.y;
-
 		// top screen
-		ImGui::SetNextWindowSize(ImVec2(width, height * 0.5f), ImGuiCond_FirstUseEver);
-		ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_FirstUseEver);
+		//ImGui::SetNextWindowSize(ImVec2(width, height * 0.5f), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowPos(ImVec2(width*0.05f, height*0.20f), ImGuiCond_FirstUseEver);
 
-			ImGui::Begin("Demo Window 1");
-   			ImGui::Button("Hello!");
-   			ImGui::End();
+			ImGui::Begin("Preview of home/sleep menu here?", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
+			ImGui::Button("This button is off the touch screen. Good luck hitting it.");
+			ImGui::End();
+
+			//ImGui::ShowStyleEditor();
+			//ImGui::ShowDemoWindow();
 
 		// bottom screen
 		ImGui::SetNextWindowSize(ImVec2(width * 0.8f, height * 0.5f));
 		ImGui::SetNextWindowPos(ImVec2(width * 0.1f, height * 0.5f), ImGuiCond_FirstUseEver);
 
-			ImGui::Begin("Demo Window 2", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_MenuBar);
-			ImGui::Button("Hello!");
+			ImGui::Begin("Top Screen Sleep Menu", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+			//ImGui::Button("Hello!");
+			static ImVec4 top_sleep_background = ImVec4(70.0f / 255.0f, 70.0f / 255.0f, 70.0f / 255.0f, 255.0f / 255.0f);
+			if (ImGui::Button("Edit"))
+				ImGui::OpenPopup("my_select_popup");
+			ImGui::SameLine();
+			if (ImGui::BeginPopup("my_select_popup")) {
+				ImGui::PushItemWidth(212.0f); //Setting height through width
+				ImGui::ColorPicker3("Color", (float*)&top_sleep_background, ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_DisplayHex | ImGuiColorEditFlags_NoLabel);
+			    ImGui::EndPopup();
+			}
+			ImGui::ColorButton("Background", top_sleep_background, ImGuiColorEditFlags_NoAlpha);
+			ImGui::SameLine();
+			ImGui::Text("Background");
+			//ImGui::ColorEdit3("Background", (float*)&top_sleep_background, color_flags);
+			
+			ImGui::Separator(); ImGui::Button("Edit"); ImGui::SameLine();
+			static ImVec4 top_sleep_background_glow = ImVec4(60.0f / 255.0f, 60.0f / 255.0f, 60.0f / 255.0f, 255.0f / 255.0f);
+			ImGui::ColorEdit3("Background Glow", (float*)&top_sleep_background_glow, color_flags);
+			ImGui::Separator(); ImGui::Button("Edit"); ImGui::SameLine();
+			static ImVec4 top_sleep_background_stripes = ImVec4(35.0f / 255.0f, 35.0f / 255.0f, 45.0f / 255.0f, 255.0f / 255.0f);
+			ImGui::ColorEdit3("Background Stripes", (float*)&top_sleep_background_stripes, color_flags);
+			ImGui::Separator(); ImGui::Button("Edit"); ImGui::SameLine();
+			static ImVec4 top_sleep_header = ImVec4(255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f);
+			ImGui::ColorEdit3("Header Color", (float*)&top_sleep_header, color_flags);
+			ImGui::Separator(); ImGui::Button("Edit"); ImGui::SameLine();
+			static ImVec4 top_sleep_text = ImVec4(255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f);
+			ImGui::ColorEdit3("Text Color", (float*)&top_sleep_text, color_flags);
+			ImGui::Separator(); ImGui::Button("Edit"); ImGui::SameLine();
+			static ImVec4 top_sleep_footer = ImVec4(255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f);
+			ImGui::ColorEdit3("Footer Color", (float*)&top_sleep_footer, color_flags);
+			ImGui::Separator(); ImGui::Button("Edit"); ImGui::SameLine();
+			static ImVec4 top_sleep_line = ImVec4(255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f);
+			ImGui::ColorEdit3("Line Color", (float*)&top_sleep_line, color_flags);
+			ImGui::Dummy(ImVec2(0.0f, 30.0f));
+			ImGui::Button("Apply");
+			ImGui::SameLine();
+			ImGui::Button("Back");
+			ImGui::SameLine();
+			if (ImGui::Button("Reset All")) {
+				top_sleep_background = ImVec4(70.0f / 255.0f, 70.0f / 255.0f, 70.0f / 255.0f, 255.0f / 255.0f);
+				top_sleep_background_glow = ImVec4(60.0f / 255.0f, 60.0f / 255.0f, 60.0f / 255.0f, 255.0f / 255.0f);
+				top_sleep_background_stripes = ImVec4(35.0f / 255.0f, 35.0f / 255.0f, 45.0f / 255.0f, 255.0f / 255.0f);
+				top_sleep_header = ImVec4(255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f);
+				top_sleep_text = ImVec4(255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f);
+				top_sleep_footer = ImVec4(255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f);
+				top_sleep_line = ImVec4(255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f);
+			};
 			ImGui::End();
 
 		// render frame
