@@ -14,16 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "3ds/imgui_citro3d.h"
-#include "3ds/imgui_ctru.h"
-#include "imgui/imgui.h"
-#include "widgets.h"
-
-#include <cstdio>
-#include <cstdlib>
-
-#include <citro3d.h>
-#include <tex3ds.h>
+#include "main.h"
 
 #if ANTI_ALIAS
 /// \brief Display transfer scaling
@@ -128,6 +119,17 @@ int main (int argc_, char *argv_[]) {
 	auto const width = io.DisplaySize.x;
 	auto const height = io.DisplaySize.y;
 
+	FILE *source = fopen("sdmc:/luma/titles/0004003000008F02/romfs/sleep_LZ.bin","rb+");
+	FileBuffer uncompressed = UncompressLz77(source);
+
+	static ImVec4 top_sleep_background			= getColor(0x00001CD4, uncompressed);
+	static ImVec4 top_sleep_background_glow		= getColor(0x00001CD8, uncompressed);
+	static ImVec4 top_sleep_background_stripes	= getColor(0x00001CD0, uncompressed);
+	static ImVec4 top_sleep_header				= getColor(0x00001D70, uncompressed);
+	static ImVec4 top_sleep_text				= getColor(0x00001DA4, uncompressed);
+	static ImVec4 top_sleep_footer				= getColor(0x00001EA8, uncompressed);
+	static ImVec4 top_sleep_line				= getColor(0x00001E24, uncompressed);
+
 	while (aptMainLoop()) {
 
 		hidScanInput();
@@ -141,10 +143,10 @@ int main (int argc_, char *argv_[]) {
 
 		// top screen
 		//ImGui::SetNextWindowSize(ImVec2(width, height * 0.5f), ImGuiCond_FirstUseEver);
-		ImGui::SetNextWindowPos(ImVec2(width*0.05f, height*0.20f), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowPos(ImVec2(width*0.03f, height*0.20f), ImGuiCond_FirstUseEver);
 
 			ImGui::Begin("Preview of home/sleep menu here?", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
-			ImGui::Text("At this stage, no actual home menu files are being loaded");
+			ImGui::Text("sdmc:/luma/titles/0004003000008F02/romfs/sleep_LZ.bin");
 			ImGui::End();
 
 			//ImGui::ShowStyleEditor();
@@ -155,13 +157,6 @@ int main (int argc_, char *argv_[]) {
 		ImGui::SetNextWindowPos(ImVec2(width * 0.1f, height * 0.5f), ImGuiCond_FirstUseEver);
 
 			ImGui::Begin("Window Title (Top Screen Sleep)", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
-			static ImVec4 top_sleep_background = ImVec4(70.0f / 255.0f, 70.0f / 255.0f, 70.0f / 255.0f, 255.0f / 255.0f);
-			static ImVec4 top_sleep_background_glow = ImVec4(60.0f / 255.0f, 60.0f / 255.0f, 60.0f / 255.0f, 255.0f / 255.0f);
-			static ImVec4 top_sleep_background_stripes = ImVec4(35.0f / 255.0f, 35.0f / 255.0f, 45.0f / 255.0f, 255.0f / 255.0f);
-			static ImVec4 top_sleep_header = ImVec4(255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f);
-			static ImVec4 top_sleep_text = ImVec4(255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f);
-			static ImVec4 top_sleep_footer = ImVec4(255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f);
-			static ImVec4 top_sleep_line = ImVec4(255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f);
 			static bool color_wheel = false;
 			ImGuiColorEditFlags color_flags = color_wheel ? ImGuiColorEditFlags_PickerHueWheel : 0;
 
@@ -183,11 +178,21 @@ int main (int argc_, char *argv_[]) {
 			ImGui::Checkbox("Color Wheel", &color_wheel);
 			ImGui::EndChild();
 			ImGui::Dummy(ImVec2(0.0f, 14.0f));
-			ImGui::Button("Apply");
+			if (ImGui::Button("Apply")) {
+				writeColor(top_sleep_background, 0x00001CD4, uncompressed);
+				writeColor(top_sleep_background_glow, 0x00001CD8, uncompressed);
+				writeColor(top_sleep_background_stripes, 0x00001CD0, uncompressed);
+				writeColor(top_sleep_header, 0x00001D70, uncompressed);
+				writeColor(top_sleep_text, 0x00001DA4, uncompressed);
+				writeColor(top_sleep_footer, 0x0000EA8, uncompressed);
+				writeColor(top_sleep_line, 0x00001E24, uncompressed);
+				fseek(source, 0, SEEK_SET);
+				CompressLzExFile(uncompressed, source);
+			}
+			//ImGui::SameLine();
+			//ImGui::Button("Back");
 			ImGui::SameLine();
-			ImGui::Button("Back");
-			ImGui::SameLine();
-			if (ImGui::Button("Default Colors")) {
+			if (ImGui::Button("Default Colors")) { //Default Top Screen Menu Colors
 				top_sleep_background = ImVec4(70.0f / 255.0f, 70.0f / 255.0f, 70.0f / 255.0f, 255.0f / 255.0f);
 				top_sleep_background_glow = ImVec4(60.0f / 255.0f, 60.0f / 255.0f, 60.0f / 255.0f, 255.0f / 255.0f);
 				top_sleep_background_stripes = ImVec4(35.0f / 255.0f, 35.0f / 255.0f, 45.0f / 255.0f, 255.0f / 255.0f);
@@ -211,6 +216,9 @@ int main (int argc_, char *argv_[]) {
 		C3D_FrameEnd(0);
 	}
 
+	//Close file
+	fclose(source);
+
 	// clean up resources
 	imgui::citro3d::exit();
 
@@ -229,4 +237,58 @@ int main (int argc_, char *argv_[]) {
 	acExit();
 
 	ImGui::DestroyContext();
+}
+
+
+FileBuffer UncompressLz77(FILE* fp) {
+	//bool ret = fp != nullptr;
+	//if (!ret) return nullptr;
+
+	fseek(fp, 0, SEEK_END);
+	uint32_t uCompressedSize = static_cast<uint32_t>(ftell(fp));
+	fseek(fp, 0, SEEK_SET);
+	uint8_t* pCompressed = new uint8_t[uCompressedSize];
+	fread(pCompressed, 1, uCompressedSize, fp);
+	u32 uUncompressedSize = 0;
+	/*bResult = */CLz77::GetUncompressedSize(pCompressed, uCompressedSize, uUncompressedSize);
+	//Add error handling
+
+	uint8_t* pUncompressed = new uint8_t[uUncompressedSize];
+	/*bResult = */CLz77::Uncompress(pCompressed, uCompressedSize, pUncompressed, uUncompressedSize);
+	//Add error handling
+	FileBuffer file = {pUncompressed, uUncompressedSize};
+	return file;
+}
+
+bool CompressLzExFile(FileBuffer input, FILE* output) {
+	uint32_t uCompressedSize = CLz77::GetCompressBoundSize(input.bufferSize, 1);
+
+	uint8_t* pCompressed = new uint8_t[uCompressedSize];
+
+	CLz77::CompressLzEx(input.buffer, input.bufferSize, pCompressed, uCompressedSize, 1);
+	if (output != nullptr) {
+		fwrite(pCompressed, 1, uCompressedSize, output);
+	} else {
+		return false;
+	} //else error
+	return true;
+}
+
+
+//TEMPORARY - Ignore alpha values
+void writeColor(ImVec4 color, unsigned int offset, FileBuffer file) {
+	float max = 255.0f;
+	file.buffer[offset] = (uint8_t)(round(color.x * max));
+	file.buffer[offset + 1] = (uint8_t)(round(color.y * max));
+	file.buffer[offset + 2] = (uint8_t)(round(color.z * max));
+}
+
+ImVec4 getColor(unsigned int offset, FileBuffer file) {
+	float max = 255.0f;
+	float red = (float)file.buffer[offset];
+	float green = (float)file.buffer[offset + 1];
+	float blue = (float)file.buffer[offset + 2];
+	//float alpha = (float)file.buffer[offset + 3];
+	float alpha = 255.0f;
+	return ImVec4(red/max, green/max, blue/max, alpha/max);
 }
