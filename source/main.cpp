@@ -17,6 +17,7 @@
 #include "3ds/imgui_citro3d.h"
 #include "3ds/imgui_ctru.h"
 #include "imgui/imgui.h"
+#include "widgets.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -56,10 +57,10 @@ constexpr auto DISPLAY_TRANSFER_FLAGS =
 	GX_TRANSFER_IN_FORMAT (GX_TRANSFER_FMT_RGBA8) | GX_TRANSFER_OUT_FORMAT (GX_TRANSFER_FMT_RGB8) |
 	GX_TRANSFER_SCALING (TRANSFER_SCALING);
 
-/// \brief Texture atlas
-C3D_Tex s_gfxTexture;
-/// \brief Texture atlas metadata
-Tex3DS_Texture s_gfxT3x;
+///// \brief Texture atlas
+//C3D_Tex s_gfxTexture;
+///// \brief Texture atlas metadata
+//Tex3DS_Texture s_gfxT3x;
 
 /// \brief Clear color
 constexpr auto CLEAR_COLOR = 0x0080FFFF;
@@ -110,7 +111,8 @@ int main (int argc_, char *argv_[]) {
 	// disable imgui.ini file
 	io.IniFilename = nullptr;
 
-	style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+	style.Colors[ImGuiCol_WindowBg].w = 0.9f;
+	style.Colors[ImGuiCol_PopupBg].w = 1.0f;
 	style.ScaleAllSizes(0.5f);
 	
 	// bottom screen safe area. number from trial/error
@@ -125,9 +127,6 @@ int main (int argc_, char *argv_[]) {
 	io.DisplayFramebufferScale = ImVec2(FB_SCALE, FB_SCALE);
 	auto const width = io.DisplaySize.x;
 	auto const height = io.DisplaySize.y;
-
-	//ImGui::SetColorEditOptions(ImGuiColorEditFlags_Uint8 | ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_InputRGB | ImGuiColorEditFlags_PickerHueBar);
-	ImGuiColorEditFlags color_flags = ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_DisplayHex | ImGuiColorEditFlags_PickerHueWheel; //| ImGuiColorEditFlags_NoPicker;
 
 	while (aptMainLoop()) {
 
@@ -145,7 +144,7 @@ int main (int argc_, char *argv_[]) {
 		ImGui::SetNextWindowPos(ImVec2(width*0.05f, height*0.20f), ImGuiCond_FirstUseEver);
 
 			ImGui::Begin("Preview of home/sleep menu here?", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
-			ImGui::Button("This button is off the touch screen. Good luck hitting it.");
+			ImGui::Text("At this stage, no actual home menu files are being loaded");
 			ImGui::End();
 
 			//ImGui::ShowStyleEditor();
@@ -155,46 +154,40 @@ int main (int argc_, char *argv_[]) {
 		ImGui::SetNextWindowSize(ImVec2(width * 0.8f, height * 0.5f));
 		ImGui::SetNextWindowPos(ImVec2(width * 0.1f, height * 0.5f), ImGuiCond_FirstUseEver);
 
-			ImGui::Begin("Top Screen Sleep Menu", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
-			//ImGui::Button("Hello!");
+			ImGui::Begin("Window Title (Top Screen Sleep)", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 			static ImVec4 top_sleep_background = ImVec4(70.0f / 255.0f, 70.0f / 255.0f, 70.0f / 255.0f, 255.0f / 255.0f);
-			if (ImGui::Button("Edit"))
-				ImGui::OpenPopup("my_select_popup");
-			ImGui::SameLine();
-			if (ImGui::BeginPopup("my_select_popup")) {
-				ImGui::PushItemWidth(212.0f); //Setting height through width
-				ImGui::ColorPicker3("Color", (float*)&top_sleep_background, ImGuiColorEditFlags_DisplayRGB | ImGuiColorEditFlags_DisplayHex | ImGuiColorEditFlags_NoLabel);
-			    ImGui::EndPopup();
-			}
-			ImGui::ColorButton("Background", top_sleep_background, ImGuiColorEditFlags_NoAlpha);
-			ImGui::SameLine();
-			ImGui::Text("Background");
-			//ImGui::ColorEdit3("Background", (float*)&top_sleep_background, color_flags);
-			
-			ImGui::Separator(); ImGui::Button("Edit"); ImGui::SameLine();
 			static ImVec4 top_sleep_background_glow = ImVec4(60.0f / 255.0f, 60.0f / 255.0f, 60.0f / 255.0f, 255.0f / 255.0f);
-			ImGui::ColorEdit3("Background Glow", (float*)&top_sleep_background_glow, color_flags);
-			ImGui::Separator(); ImGui::Button("Edit"); ImGui::SameLine();
 			static ImVec4 top_sleep_background_stripes = ImVec4(35.0f / 255.0f, 35.0f / 255.0f, 45.0f / 255.0f, 255.0f / 255.0f);
-			ImGui::ColorEdit3("Background Stripes", (float*)&top_sleep_background_stripes, color_flags);
-			ImGui::Separator(); ImGui::Button("Edit"); ImGui::SameLine();
 			static ImVec4 top_sleep_header = ImVec4(255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f);
-			ImGui::ColorEdit3("Header Color", (float*)&top_sleep_header, color_flags);
-			ImGui::Separator(); ImGui::Button("Edit"); ImGui::SameLine();
 			static ImVec4 top_sleep_text = ImVec4(255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f);
-			ImGui::ColorEdit3("Text Color", (float*)&top_sleep_text, color_flags);
-			ImGui::Separator(); ImGui::Button("Edit"); ImGui::SameLine();
 			static ImVec4 top_sleep_footer = ImVec4(255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f);
-			ImGui::ColorEdit3("Footer Color", (float*)&top_sleep_footer, color_flags);
-			ImGui::Separator(); ImGui::Button("Edit"); ImGui::SameLine();
 			static ImVec4 top_sleep_line = ImVec4(255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f);
-			ImGui::ColorEdit3("Line Color", (float*)&top_sleep_line, color_flags);
-			ImGui::Dummy(ImVec2(0.0f, 30.0f));
+			static bool color_wheel = false;
+			ImGuiColorEditFlags color_flags = color_wheel ? ImGuiColorEditFlags_PickerHueWheel : 0;
+
+			ImGui::BeginChild("##ColorSelection", ImVec2(315.0f, 180.0f));
+			ImGui::ColorPicker3ButtonSized("Background", top_sleep_background, color_flags);
+			ImGui::Separator();
+			ImGui::ColorPicker3ButtonSized("Background Glow", top_sleep_background_glow, color_flags);
+			ImGui::Separator();
+			ImGui::ColorPicker3ButtonSized("Background Stripes", top_sleep_background_stripes, color_flags);
+			ImGui::Separator();
+			ImGui::ColorPicker3ButtonSized("Header Color", top_sleep_header, color_flags);
+			ImGui::Separator();
+			ImGui::ColorPicker3ButtonSized("Text Color", top_sleep_text, color_flags);
+			ImGui::Separator();
+			ImGui::ColorPicker3ButtonSized("Footer Color", top_sleep_footer, color_flags);
+			ImGui::Separator();
+			ImGui::ColorPicker3ButtonSized("Line Color", top_sleep_line, color_flags);
+			ImGui::Separator();
+			ImGui::Checkbox("Color Wheel", &color_wheel);
+			ImGui::EndChild();
+			ImGui::Dummy(ImVec2(0.0f, 14.0f));
 			ImGui::Button("Apply");
 			ImGui::SameLine();
 			ImGui::Button("Back");
 			ImGui::SameLine();
-			if (ImGui::Button("Reset All")) {
+			if (ImGui::Button("Default Colors")) {
 				top_sleep_background = ImVec4(70.0f / 255.0f, 70.0f / 255.0f, 70.0f / 255.0f, 255.0f / 255.0f);
 				top_sleep_background_glow = ImVec4(60.0f / 255.0f, 60.0f / 255.0f, 60.0f / 255.0f, 255.0f / 255.0f);
 				top_sleep_background_stripes = ImVec4(35.0f / 255.0f, 35.0f / 255.0f, 45.0f / 255.0f, 255.0f / 255.0f);
@@ -222,8 +215,8 @@ int main (int argc_, char *argv_[]) {
 	imgui::citro3d::exit();
 
 	// free graphics
-	Tex3DS_TextureFree(s_gfxT3x);
-	C3D_TexDelete(&s_gfxTexture);
+	//Tex3DS_TextureFree(s_gfxT3x);
+	//C3D_TexDelete(&s_gfxTexture);
 
 	// free render targets
 	C3D_RenderTargetDelete(s_bottom);
