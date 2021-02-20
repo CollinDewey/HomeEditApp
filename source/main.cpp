@@ -119,8 +119,9 @@ int main (int argc_, char *argv_[]) {
 	auto const width = io.DisplaySize.x;
 	auto const height = io.DisplaySize.y;
 
-	FILE *source = fopen("sdmc:/luma/titles/0004003000008F02/romfs/sleep_LZ.bin","rb+");
+	FILE *source = fopen("sdmc:/luma/titles/0004003000008F02/romfs/sleep_LZ.bin","rb");
 	FileBuffer uncompressed = UncompressLz77(source);
+	fclose(source);
 
 	static ImVec4 top_sleep_background			= getColor(0x00001CD4, uncompressed);
 	static ImVec4 top_sleep_background_glow		= getColor(0x00001CD8, uncompressed);
@@ -184,10 +185,11 @@ int main (int argc_, char *argv_[]) {
 				writeColor(top_sleep_background_stripes, 0x00001CD0, uncompressed);
 				writeColor(top_sleep_header, 0x00001D70, uncompressed);
 				writeColor(top_sleep_text, 0x00001DA4, uncompressed);
-				writeColor(top_sleep_footer, 0x0000EA8, uncompressed);
+				writeColor(top_sleep_footer, 0x0001EA8, uncompressed);
 				writeColor(top_sleep_line, 0x00001E24, uncompressed);
-				fseek(source, 0, SEEK_SET);
+				FILE *source = fopen("sdmc:/luma/titles/0004003000008F02/romfs/sleep_LZ.bin","wb");
 				CompressLzExFile(uncompressed, source);
+				fclose(source);
 			}
 			//ImGui::SameLine();
 			//ImGui::Button("Back");
@@ -215,9 +217,6 @@ int main (int argc_, char *argv_[]) {
 
 		C3D_FrameEnd(0);
 	}
-
-	//Close file
-	fclose(source);
 
 	// clean up resources
 	imgui::citro3d::exit();
