@@ -1,4 +1,4 @@
-# HomeEdit3DS
+# HomeEditApp
 Research and Software on modifications of the 3DS Home Menu
 
 # Extra notes
